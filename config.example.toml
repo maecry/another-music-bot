@@ -1,0 +1,32 @@
+# Copy to config.toml and fill in. DISCORD_TOKEN env var overrides `token`.
+token = "PASTE_BOT_TOKEN_HERE"
+
+# Optional: a server ID to sync slash commands to instantly while testing.
+# Leave 0 to sync globally (can take up to an hour to show up the first time).
+dev_guild_id = 0
+
+# Optional: Netscape cookies.txt for YouTube if the host IP gets "confirm you're not a bot".
+cookies_file = ""
+
+max_queue = 500          # tracks per server
+idle_timeout = 300       # seconds with an empty queue before leaving
+alone_timeout = 180      # seconds alone in the channel before leaving
+autocomplete = true      # YouTube suggestions while typing /play (costs a little CPU)
+accent_color = 0x5865F2  # now-playing panel color
+
+# Audio cache: songs are saved after their first play and replayed from disk
+# (no YouTube lookup, no re-download). Songs not played for `cache_days` are deleted.
+cache_size_gb = 3.0
+cache_days = 7
+cache_max_minutes = 15
+
+# Extra slash-command names. Format: command = ["alias", ...]
+# Alias names: lowercase letters, digits, - or _, max 32 chars.
+[aliases]
+skip = ["next"]
+loop = ["repeat"]
+play = ["p"]
+nowplaying = ["np"]
+queue = ["q"]
+leave = ["disconnect"]
+previous = ["back"]

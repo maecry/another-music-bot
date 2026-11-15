@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+config.toml
+cookies.txt
+cache/
+logs/
+data/
+.env
+cookies*.txt
+*.log
+.local/
+.cache/
+.claude/
+.codegraph/
+.vscode/
+.idea/
+.apollo/
