@@ -43,8 +43,12 @@ class ControlButton(ui.DynamicItem[ui.Button], template=r"music:(?P<action>[a-z]
         await handle_control(interaction, self.action)
 
 
-class QueueSelect(ui.DynamicItem[ui.Select], template=r"music-jump"):
-    def __init__(self, tracks: list[Track] | None = None):
+PLACEHOLDER = {"jump": "Queue - Select a track to play", "next": "Move a track to play next"}
+
+
+class QueueSelect(ui.DynamicItem[ui.Select], template=r"music-(?P<action>jump|next)"):
+    def __init__(self, tracks: list[Track] | None = None, action: str = "jump"):
+        self.action = action
         options = [
             discord.SelectOption(
                 label=short(f"{i}. {t.title}", 100),
@@ -54,18 +58,18 @@ class QueueSelect(ui.DynamicItem[ui.Select], template=r"music-jump"):
             for i, t in enumerate((tracks or [])[:25], 1)
         ] or [discord.SelectOption(label="Queue is empty", value="none")]
         super().__init__(ui.Select(
-            custom_id="music-jump",
-            placeholder="Queue - Select a track to play" if tracks else "Queue is empty",
+            custom_id=f"music-{action}",
+            placeholder=PLACEHOLDER[action] if tracks else "Queue is empty",
             options=options,
             disabled=not tracks,
         ))
 
     @classmethod
     async def from_custom_id(cls, interaction: discord.Interaction, item: ui.Select, match):
-        return cls()
+        return cls(action=match["action"])
 
     async def callback(self, interaction: discord.Interaction) -> None:
-        await handle_control(interaction, "jump", (interaction.data.get("values") or [""])[0])
+        await handle_control(interaction, self.action, (interaction.data.get("values") or [""])[0])
 
 
 class PanelView(ui.LayoutView):
@@ -97,6 +101,8 @@ class PanelView(ui.LayoutView):
             status.insert(0, "⏸️ Paused")
         box.add_item(ui.TextDisplay("-# " + " · ".join(status)))
         box.add_item(ui.ActionRow(QueueSelect(list(player.queue))))
+        if len(player.queue) > 1:  # moving #1 to next does nothing
+            box.add_item(ui.ActionRow(QueueSelect(list(player.queue), "next")))
         self.add_item(box)
 
         paused = player.paused
@@ -179,12 +185,16 @@ async def handle_control(interaction: discord.Interaction, action: str, value: s
         player.cycle_loop()
     elif action == "shuffle":
         player.shuffle()
-    elif action == "jump":
+    elif action in ("jump", "next"):
         track = next((t for t in player.queue if str(id(t)) == value), None)
         if not track:
             return await interaction.response.send_message("That track isn't in the queue anymore.", ephemeral=True)
-        await interaction.response.defer()
-        return player.jump(track)  # the new track posts a fresh panel
+        if action == "next":
+            player.queue.remove(track)
+            player.queue.insert(0, track)  # falls through to redraw the panel
+        else:
+            await interaction.response.defer()
+            return player.jump(track)  # the new track posts a fresh panel
     elif action == "previous":
         if not player.history:
             return await interaction.response.send_message("No previous track.", ephemeral=True)

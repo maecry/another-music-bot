@@ -69,10 +69,10 @@ then picks the next action from flags (`_skip`, `_seek_to`, `_back`).
 (the YouTube URL). `apply_stream()` keeps the Spotify title/artist when filling YouTube data.
 
 ## UI (Components V2)
-- `PanelView` is a `ui.LayoutView`: Container (Section with Thumbnail, status line, `QueueSelect`)
+- `PanelView` is a `ui.LayoutView`: Container (Section with Thumbnail, status line, `QueueSelect` jump + a second "play next" `QueueSelect` when 2+ queued)
   + two `ActionRow`s of `ControlButton`s. Components V2 messages cannot have `content` or embeds.
 - Max 5 buttons per ActionRow, 25 select options.
-- Buttons/select are `DynamicItem`s matched by custom_id (`music:<action>`, `music-jump`), so old
+- Buttons/select are `DynamicItem`s matched by custom_id (`music:<action>`, `music-jump`, `music-next`), so old
   panels keep working after a restart. All actions go through `ui.handle_control()`.
 - A new track deletes the old panel and posts a new one, so it stays at the bottom of the chat.
   `refresh_panel()` edits in place (queue count, loop, pause, filter).
