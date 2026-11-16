@@ -1,7 +1,9 @@
 import copy
 import logging
 import logging.handlers
+import os
 import re
+import sys
 from pathlib import Path
 
 import discord
@@ -131,7 +133,11 @@ def main() -> None:
         log.info("deno: %s", deno)
     else:
         log.warning("deno not found: YouTube playback will likely fail (pip install deno)")
-    MusicBot(config).run(config.token, log_handler=None)
+    bot = MusicBot(config)
+    bot.run(config.token, log_handler=None)
+    if getattr(bot, "restart", False):  # set by /update: start fresh in the same process slot
+        log.info("restarting after /update")
+        os.execv(sys.executable, [sys.executable, *sys.argv])
 
 
 if __name__ == "__main__":

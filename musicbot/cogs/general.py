@@ -10,7 +10,7 @@ CATEGORIES = [
     ("🎮 Fun", ["quiz", "guess", "wrapped"]),
     ("🇻🇳 Community", ["lunar", "setlunardayremind", "setghostping"]),
     ("⚙️ Server (Manage Server)", ["settings"]),
-    ("🔧 Owner only", ["stats", "sync"]),
+    ("🔧 Owner only", ["stats", "sync", "update"]),
     ("❔ Other", []),
 ]
 
