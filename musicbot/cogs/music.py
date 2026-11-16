@@ -209,13 +209,16 @@ class Music(commands.Cog):
         if not interaction.user.voice:
             raise UserError("Join a voice channel first.")
         await interaction.response.defer(thinking=True)
-        query = await self._ask_playlist(interaction, query)
+        query, first = await self._ask_playlist(interaction, query)
         try:
             if is_meta_url(query):
                 tracks, playlist = await self.meta.fetch(query)
             else:
                 default = self.settings.get(interaction.guild_id).default_source
                 tracks, playlist = await self.extractor.search(query, source.value if source else default)
+                # the song you linked plays first, then the rest of the playlist without it
+                i = next((i for i, t in enumerate(tracks) if first and first in t.url), 0)
+                tracks.insert(0, tracks.pop(i))
         except ExtractError as e:
             raise UserError(f"Couldn't load that: {e}")
         player = await self._connect(interaction)
@@ -237,21 +240,24 @@ class Music(commands.Cog):
             msg = f"🎵 Queued **[{esc(t.title)}](<{t.url}>)** `{fmt_time(t.duration)}` · {where}"
         await interaction.followup.send(msg)
 
-    async def _ask_playlist(self, interaction: discord.Interaction, query: str) -> str:
-        """watch?v=X&list=Y -> ask; returns the playlist URL or the original (song-only) link."""
+    async def _ask_playlist(self, interaction: discord.Interaction, query: str) -> tuple[str, str | None]:
+        """watch?v=X&list=Y -> ask. Returns (playlist URL, X) or (the original song-only link, None)."""
         parts = urlsplit(query.strip())
         qs = parse_qs(parts.query)
         list_id = qs.get("list", [""])[0]
         host = parts.netloc.lower()
         # RD... = YouTube auto-mixes, which yt-dlp can't load as a playlist
         if "youtu" not in host or not list_id or list_id.startswith("RD") or not ("v" in qs or "youtu.be" in host):
-            return query
+            return query, None
         view = PlaylistPrompt(interaction.user.id)
         msg = await interaction.followup.send("This song is part of a playlist. Queue the whole playlist?",
                                               view=view, wait=True)
         if await view.wait():  # timed out: default to just the song
             await msg.edit(content="🎵 No answer, queuing just this song...", view=None)
-        return f"https://www.youtube.com/playlist?list={list_id}" if view.whole else query
+        if not view.whole:
+            return query, None
+        video_id = qs["v"][0] if "v" in qs else parts.path.strip("/")
+        return f"https://www.youtube.com/playlist?list={list_id}", video_id
 
     @playnext.autocomplete("query")
     @play.autocomplete("query")

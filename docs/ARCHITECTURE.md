@@ -19,7 +19,7 @@ musicbot/
   player.py            GuildPlayer: queue, history, loop, filters, play loop, timers, panel
   ui.py                Components V2 panel (PanelView), queue pages, persistent buttons
   cogs/music.py        all music slash commands + /filter + /settings group
-  cogs/admin.py        owner-only /stats and /sync
+  cogs/admin.py        owner-only /stats, /sync, /update (git pull, pip if requirements changed, then bot.close + os.execv in main)
   cogs/general.py      /help (built from the command tree)
   cogs/community.py    /lunar, /setlunardayremind (hourly tasks.loop), ghost-ping tracker (/setghostping)
   cogs/wrapped.py      /wrapped: SQL over history.db -> paged LayoutView "story"
@@ -46,7 +46,7 @@ no members intent. `MusicBot` owns the shared `settings` (SettingsStore) and `st
 /play -> Music._play
    is_meta_url? -> MetaSources.fetch (Spotify/Deezer page/API -> Tracks with search_query)
    else         -> Extractor.search (URL or ytsearch1:/scsearch1:, playlists flat)
-               (YouTube watch?v=X&list=Y: buttons ask first, "whole playlist" -> playlist?list=Y)
+               (YouTube watch?v=X&list=Y: buttons ask first, "whole playlist" -> playlist?list=Y, X moved to the front)
    -> Music._connect (join voice, create GuildPlayer) -> player.enqueue
 GuildPlayer._run (one asyncio task per guild, loops forever):
    _next_track()                    loop/history/previous handling
