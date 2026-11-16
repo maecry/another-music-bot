@@ -5,6 +5,10 @@ token = "PASTE_BOT_TOKEN_HERE"
 # Leave 0 to sync globally (can take up to an hour to show up the first time).
 dev_guild_id = 0
 
+# Optional: extra user IDs allowed to use owner-only commands (/stats, /sync, /update).
+# The bot's owner in the Developer Portal always counts.
+owner_ids = []
+
 # Optional: Netscape cookies.txt for YouTube if the host IP gets "confirm you're not a bot".
 cookies_file = ""
 

@@ -58,7 +58,7 @@ Python 3.11+ required.
 the audio (~5-10% of a CPU core per playing server), so leave them Off when not wanted.
 · `/settings view|edit|reset` (Manage Server): default search source, idle/alone timeouts (0 = never
 leave, i.e. 24/7), and a fixed channel for the now-playing panel. Saved in `data/settings.json`.
-· owner only: `/stats` `/sync` `/update` (git pull + restart the bot, no panel restart needed)
+· owner only: `/stats` `/sync` `/update` (git pull + restart the bot, no panel restart needed). Owner = the app owner plus `owner_ids` in config.toml
 
 **Fun & community**
 - `/quiz start [playlist] [rounds]`: guess-the-song in your voice channel, Heardle style. Each round

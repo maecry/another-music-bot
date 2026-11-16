@@ -19,6 +19,7 @@ DEFAULT_ALIASES = {
 class Config:
     token: str
     dev_guild_id: int = 0
+    owner_ids: list = field(default_factory=list)  # extra users allowed to use owner-only commands
     cookies_file: str = ""
     max_queue: int = 500
     idle_timeout: int = 300

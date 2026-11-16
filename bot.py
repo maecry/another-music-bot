@@ -108,6 +108,9 @@ class MusicBot(commands.Bot):
         self.command_ids = {c.name: c.id for c in synced}  # for clickable </cmd:id> mentions in /help
         return len(synced)
 
+    async def is_owner(self, user) -> bool:
+        return user.id in self.config.owner_ids or await super().is_owner(user)
+
     async def close(self) -> None:
         await super().close()
         self.stats.close()
