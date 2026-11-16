@@ -426,6 +426,19 @@ class Music(commands.Cog):
         await player.refresh_panel()
         await interaction.response.send_message(f"↕️ Moved **{esc(t.title)}** to #{to_pos}")
 
+    @remove.autocomplete("position")
+    @move.autocomplete("from_pos")
+    @move.autocomplete("to_pos")
+    async def queue_autocomplete(self, interaction: discord.Interaction, current: str):
+        """Lists queued songs as '3. Title' so you can pick by name; typed digits or text filter it."""
+        player = self.players.get(interaction.guild_id)
+        if not player:
+            return []
+        q = current.strip().lower()
+        hits = [(i, t) for i, t in enumerate(player.queue, 1)
+                if not q or str(i).startswith(q) or q in t.title.lower()]
+        return [app_commands.Choice(name=f"{i}. {t.title}"[:100], value=i) for i, t in hits[:25]]
+
     @app_commands.command(description="Jump to a time in the current track")
     @app_commands.describe(time="e.g. 90, 1:30 or 1:02:03")
     async def seek(self, interaction: discord.Interaction, time: str):
