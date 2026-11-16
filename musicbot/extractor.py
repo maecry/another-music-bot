@@ -93,6 +93,9 @@ def _from_entry(entry: dict) -> Track | None:
     )
 
 
+MIX_LIMIT = 50  # ~3 s to load; YouTube Mixes run to hundreds of songs
+
+
 class Extractor:
     def __init__(self, cookies_file: str = "", playlist_limit: int = 500):
         base = {
@@ -135,21 +138,27 @@ class Extractor:
         except OSError as e:
             logging.getLogger(__name__).warning("can't save match cache: %s", e)
 
-    async def _extract(self, query: str) -> dict:
+    async def _extract(self, query: str, mix: bool = False) -> dict:
         async with self._sem:
+            params = self._ydl.params
+            saved = params["noplaylist"], params["playlistend"]
+            if mix:  # YouTube Mix (list=RD...): only loads from the watch link, and is near-endless
+                params["noplaylist"], params["playlistend"] = False, MIX_LIMIT
             try:
                 info = await asyncio.to_thread(self._ydl.extract_info, query, download=False)
             except yt_dlp.utils.DownloadError as e:
                 msg = str(e).removeprefix("ERROR: ").split("\n")[0]
                 raise ExtractError(msg[:300]) from None
+            finally:
+                params["noplaylist"], params["playlistend"] = saved
         if not info:
             raise ExtractError("Nothing found.")
         return self._ydl.sanitize_info(info)
 
-    async def search(self, query: str, source: str = "youtube") -> tuple[list[Track], str | None]:
+    async def search(self, query: str, source: str = "youtube", mix: bool = False) -> tuple[list[Track], str | None]:
         """Returns (tracks, playlist_title). Single videos come back already resolved."""
         query = query.strip()
-        info = await self._extract(query if URL_RE.match(query) else SEARCH_PREFIX[source] + query)
+        info = await self._extract(query if URL_RE.match(query) else SEARCH_PREFIX[source] + query, mix)
         if "entries" in info:
             tracks = [t for e in info["entries"] if e and (t := _from_entry(e))]
             if not tracks:

@@ -46,7 +46,8 @@ no members intent. `MusicBot` owns the shared `settings` (SettingsStore) and `st
 /play -> Music._play
    is_meta_url? -> MetaSources.fetch (Spotify/Deezer page/API -> Tracks with search_query)
    else         -> Extractor.search (URL or ytsearch1:/scsearch1:, playlists flat)
-               (YouTube watch?v=X&list=Y: buttons ask first, "whole playlist" -> playlist?list=Y, X moved to the front)
+               (YouTube watch?v=X&list=Y: buttons ask first, "whole playlist" -> playlist?list=Y, X moved to the front;
+                mix list=RD... -> watch URL with noplaylist off + playlistend=MIX_LIMIT)
    -> Music._connect (join voice, create GuildPlayer) -> player.enqueue
 GuildPlayer._run (one asyncio task per guild, loops forever):
    _next_track()                    loop/history/previous handling
