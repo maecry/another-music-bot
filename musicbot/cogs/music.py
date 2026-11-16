@@ -54,6 +54,34 @@ def parse_time(text: str) -> int:
     return secs
 
 
+class PlaylistPrompt(discord.ui.View):
+    """Asked when a YouTube link is a video inside a playlist: whole playlist or just the song?"""
+    def __init__(self, user_id: int):
+        super().__init__(timeout=30)
+        self.user_id = user_id
+        self.whole = False
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        if interaction.user.id != self.user_id:
+            await interaction.response.send_message("That's not your prompt.", ephemeral=True)
+            return False
+        return True
+
+    async def _pick(self, interaction: discord.Interaction, whole: bool):
+        self.whole = whole
+        await interaction.response.edit_message(
+            content="📃 Queuing the whole playlist..." if whole else "🎵 Queuing just this song...", view=None)
+        self.stop()
+
+    @discord.ui.button(label="Whole playlist", emoji="📃", style=discord.ButtonStyle.primary)
+    async def playlist(self, interaction: discord.Interaction, _):
+        await self._pick(interaction, True)
+
+    @discord.ui.button(label="Just this song", emoji="🎵")
+    async def song(self, interaction: discord.Interaction, _):
+        await self._pick(interaction, False)
+
+
 class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -181,6 +209,7 @@ class Music(commands.Cog):
         if not interaction.user.voice:
             raise UserError("Join a voice channel first.")
         await interaction.response.defer(thinking=True)
+        query = await self._ask_playlist(interaction, query)
         try:
             if is_meta_url(query):
                 tracks, playlist = await self.meta.fetch(query)
@@ -207,6 +236,22 @@ class Music(commands.Cog):
             where = "Playing next" if not player.current or pos <= 1 else f"#{pos} in queue"
             msg = f"🎵 Queued **[{esc(t.title)}](<{t.url}>)** `{fmt_time(t.duration)}` · {where}"
         await interaction.followup.send(msg)
+
+    async def _ask_playlist(self, interaction: discord.Interaction, query: str) -> str:
+        """watch?v=X&list=Y -> ask; returns the playlist URL or the original (song-only) link."""
+        parts = urlsplit(query.strip())
+        qs = parse_qs(parts.query)
+        list_id = qs.get("list", [""])[0]
+        host = parts.netloc.lower()
+        # RD... = YouTube auto-mixes, which yt-dlp can't load as a playlist
+        if "youtu" not in host or not list_id or list_id.startswith("RD") or not ("v" in qs or "youtu.be" in host):
+            return query
+        view = PlaylistPrompt(interaction.user.id)
+        msg = await interaction.followup.send("This song is part of a playlist. Queue the whole playlist?",
+                                              view=view, wait=True)
+        if await view.wait():  # timed out: default to just the song
+            await msg.edit(content="🎵 No answer, queuing just this song...", view=None)
+        return f"https://www.youtube.com/playlist?list={list_id}" if view.whole else query
 
     @playnext.autocomplete("query")
     @play.autocomplete("query")

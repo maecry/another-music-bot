@@ -42,7 +42,8 @@ Python 3.11+ required.
 ## Sources
 - **YouTube, SoundCloud, Bandcamp, Twitch, Vimeo, Mixcloud, direct mp3/ogg links** and
   [anything else yt-dlp supports](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md):
-  paste the link (songs, playlists, SoundCloud sets).
+  paste the link (songs, playlists, SoundCloud sets). A YouTube link to a song inside a playlist
+  asks whether to queue the whole playlist or just that song.
 - **Spotify and Deezer** links (track, album, playlist, Spotify artist, share links): their audio is
   DRM-locked, so the bot reads the song list and plays the matching YouTube upload (the closest
   length out of the top 3 results). No API key needed. Spotify links show up to about 100 songs per playlist.
