@@ -54,6 +54,8 @@ class MusicBot(commands.Bot):
             chunk_guilds_at_startup=False,
             max_messages=None,
             help_command=None,
+            # <@user> in panels/quiz/wrapped is a label, not a ping; lunar + ghost-ping pass their own
+            allowed_mentions=discord.AllowedMentions.none(),
             activity=discord.Activity(type=discord.ActivityType.listening, name="/play"),
         )
         self.config = config
