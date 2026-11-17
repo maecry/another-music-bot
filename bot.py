@@ -75,8 +75,8 @@ class MusicBot(commands.Bot):
             log.info("synced %d slash commands", n)
         except discord.Forbidden:
             log.error(
-                "Can't sync slash commands to dev_guild_id=%s (Missing Access). Check that the ID is the "
-                "server ID (right-click server icon -> Copy Server ID) and re-invite the bot with BOTH the "
+                "Can't sync slash commands (Missing Access). If dev_guild_id=%s is set, check that it is the "
+                "server ID (right-click server icon -> Copy Server ID). Also re-invite the bot with BOTH the "
                 "`bot` and `applications.commands` scopes. Restart the bot after fixing.",
                 self.config.dev_guild_id,
             )
@@ -99,13 +99,12 @@ class MusicBot(commands.Bot):
                 self.tree.add_command(clone)
 
     async def sync_commands(self) -> int:
-        if self.config.dev_guild_id:
+        synced = await self.tree.sync()  # global: every server the bot is in
+        self.command_ids = {c.name: c.id for c in synced}  # for clickable </cmd:id> mentions in /help
+        if self.config.dev_guild_id:  # also push a guild copy so new commands show up instantly there
             guild = discord.Object(self.config.dev_guild_id)
             self.tree.copy_global_to(guild=guild)
-            synced = await self.tree.sync(guild=guild)
-        else:
-            synced = await self.tree.sync()
-        self.command_ids = {c.name: c.id for c in synced}  # for clickable </cmd:id> mentions in /help
+            await self.tree.sync(guild=guild)
         return len(synced)
 
     async def is_owner(self, user) -> bool:

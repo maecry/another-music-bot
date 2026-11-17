@@ -17,7 +17,7 @@ cd another-music-bot
    History, Connect, Speak, Set Voice Channel Status** (the last one shows the song as the voice
    channel's status; optional).
 3. `cp config.example.toml config.toml` and paste the token (or set `DISCORD_TOKEN`).
-   Set `dev_guild_id` to your server ID while testing so commands appear instantly.
+   Set `dev_guild_id` to your server ID while testing so commands also appear there instantly.
 
 ### Panel host (SFTP)
 Upload the folder (without `.venv`), set the startup command to `bash start.sh`, start.

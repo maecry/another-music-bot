@@ -55,7 +55,8 @@ On Windows, set `PYTHONIOENCODING=utf-8` when printing emoji.
   owner's PC**. Login, commands, extraction and ffmpeg can be. Voice is tested on the host.
 - The host's startup command runs `pip install -U --prefix .local -r requirements.txt` then
   `python3 run.py`, so dependency pins in `requirements.txt` apply on the next restart.
-- Slash commands sync to `dev_guild_id` only (instant). `0` = global (up to an hour to appear).
+- Slash commands always sync globally (every server, up to an hour to appear). `dev_guild_id` adds a
+  guild copy so new commands show instantly in that one server.
 - Bot permissions currently needed: View Channels, Send Messages, Send Messages in Threads, Embed
   Links, Read Message History, Connect, Speak, Set Voice Channel Status (optional: Move Members).
   New features needing more must say so.

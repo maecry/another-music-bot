@@ -1,8 +1,8 @@
 # Copy to config.toml and fill in. DISCORD_TOKEN env var overrides `token`.
 token = "PASTE_BOT_TOKEN_HERE"
 
-# Optional: a server ID to sync slash commands to instantly while testing.
-# Leave 0 to sync globally (can take up to an hour to show up the first time).
+# Optional: a server ID to also sync slash commands to, so new commands show up there instantly
+# while testing. Leave 0 to only sync globally (can take up to an hour to show up the first time).
 dev_guild_id = 0
 
 # Optional: extra user IDs allowed to use owner-only commands (/stats, /sync, /update).

@@ -33,9 +33,9 @@ Runtime folders (git-ignored): `cache/` (audio + `matches.json`), `data/` (setti
 2. `prepare_path()` puts the venv / user-site `bin` on PATH so yt-dlp finds `deno`.
 3. Logs the ffmpeg path, checks `davey` imports (and errors if davey 0.2.x is installed), checks deno.
 4. `MusicBot.setup_hook`: registers the persistent `DynamicItem`s (`ControlButton`, `QueueSelect`),
-   loads the cogs, adds alias commands, syncs. With `dev_guild_id` set, commands are copied to and
-   synced on that guild only (instant); otherwise globally. Sync results fill `bot.command_ids`
-   (used by /help for clickable mentions).
+   loads the cogs, adds alias commands, syncs. Commands always sync globally (every server, may take
+   up to an hour to appear); with `dev_guild_id` set they are also copied to and synced on that guild
+   for an instant test copy. Sync results fill `bot.command_ids` (used by /help for clickable mentions).
 
 Intents: `guilds`, `voice_states`, `guild_messages` (for the ghost-ping tracker; mentions are sent
 without the message-content intent). The member cache keeps voice members only. No message content,
